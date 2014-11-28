@@ -82,7 +82,6 @@ public class GameActivity extends ActionBarActivity {
             }
             counter = counter + 1;
             imageViewArray[i] = new ImageView(this);
-            imageViewArray[i].setId(i);     // unique property for every imageView
             bitmapArray[i] = Bitmap.createBitmap(bMap, ((counter-1) * tile_size), (table_index-1) * tile_size, tile_size, tile_size);
             imageViewArray[i].setImageBitmap(bitmapArray[i]);
 //            imageViewArray[i].setTag(i);
@@ -97,22 +96,22 @@ public class GameActivity extends ActionBarActivity {
         for (int j = 0; j < imageViewArray.length-1; j++){
             indexArray.add(j);
         }
+
         Collections.shuffle(indexArray);
         Collections.shuffle(indexArray);
         indexArray.add((int) imageViewArray.length-1 );
 
-        // Here..
         changePuzzle(number_of_tiles, tiles_on_row, DIMENSION, tableArray, indexArray, imageViewArray, table_puzzle, relativeLayout, true);
-        imageViewArray[indexArray.get(number_of_tiles-1)].setVisibility(View.INVISIBLE);
+        imageViewArray[indexArray.get(number_of_tiles - 1)].setVisibility(View.INVISIBLE);
 
         View.OnClickListener clickListener = new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-//                Log.i("test", "test");
-                Log.i("indexArray before swap ", "" + indexArray.get(Integer.parseInt(view.getTag().toString())) + " - " + indexArray);
-                Collections.swap(indexArray, Integer.parseInt(view.getTag().toString()), indexArray.indexOf(number_of_tiles-1));
-                Log.i("indexArray after swap ", "" + Integer.parseInt(view.getTag().toString()) + " - " + indexArray);
-                changePuzzle(number_of_tiles, tiles_on_row, DIMENSION, tableArray, indexArray, imageViewArray, table_puzzle, relativeLayout, false);
+                if (checkMove ((ImageView) view, number_of_tiles, tiles_on_row, DIMENSION, tableArray,indexArray,imageViewArray, table_puzzle, relativeLayout ))
+                {
+                    Collections.swap(indexArray, Integer.parseInt(view.getTag().toString()), indexArray.indexOf(number_of_tiles - 1));
+                    changePuzzle(number_of_tiles, tiles_on_row, DIMENSION, tableArray, indexArray, imageViewArray, table_puzzle, relativeLayout, false);
+                }
             }
         };
 
@@ -122,8 +121,24 @@ public class GameActivity extends ActionBarActivity {
 
         }
 
-    public boolean checkMove (int number_of_tiles, int tiles_on_row, int DIMENSION, TableRow[] tableArray, ArrayList<Integer> indexArray, ImageView[] imageViewArray, TableLayout table_puzzle, RelativeLayout relativeLayout ){
-    return true;}
+    public boolean checkMove (ImageView clickedView, int number_of_tiles, int tiles_on_row, int DIMENSION, TableRow[] tableArray, ArrayList<Integer> indexArray, ImageView[] imageViewArray, TableLayout table_puzzle, RelativeLayout relativeLayout ){
+        ImageView blanc_tile = imageViewArray[number_of_tiles-1];
+        int blanc_pos = Integer.parseInt(blanc_tile.getTag().toString());
+        int clicked_pos = Integer.parseInt(clickedView.getTag().toString());
+
+        if (clicked_pos == (blanc_pos + 3)) {return true;}
+        if (clicked_pos == (blanc_pos - 3)) {return true;}
+        if (clicked_pos == (blanc_pos + 1)) {
+            if (clickedView.getParent() == blanc_tile.getParent()) {
+                return true;
+            }
+        }
+        if (clicked_pos == (blanc_pos - 1)) {
+            if (clickedView.getParent() == blanc_tile.getParent()){
+                return true;}
+            }
+
+        return false;}
 
     // The table is filled in random order with image tiles, except for last tile
     public void changePuzzle(int number_of_tiles, int tiles_on_row, int DIMENSION, TableRow[] tableArray, ArrayList<Integer> indexArray, ImageView[] imageViewArray, TableLayout table_puzzle, RelativeLayout relativeLayout, boolean init ) {
@@ -148,7 +163,9 @@ public class GameActivity extends ActionBarActivity {
             }
 
             counter = counter + 1;
-            imageViewArray[indexArray.get(i)].setTag(i);
+            imageViewArray[indexArray.get(i)].setId(indexArray.get(i));      // unique property for every imageView
+            Log.i("i = ", "" + i);
+            imageViewArray[indexArray.get(i)].setTag((i));
             tableArray[table_index - 1].addView(imageViewArray[indexArray.get(i)]);
 
             if (counter == tiles_on_row) {
@@ -157,12 +174,8 @@ public class GameActivity extends ActionBarActivity {
                 counter = 0;
             }
 
-            // Make the last tile transparent
-            if (init == true) {
-                Log.i("Added row", "" + indexArray.get(i) + " array : " + indexArray);
-
-            }
         }
+
 
         // Shows the puzzle table
         relativeLayout.addView(table_puzzle);
