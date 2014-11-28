@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.Spinner;
 import android.widget.ArrayAdapter;
@@ -30,7 +31,7 @@ public class SetupActivity extends ActionBarActivity {
         addListenerOnButton();
 
         // Create spinner to choose difficulty
-        Spinner spinner = (Spinner) findViewById(R.id.difficulty_spinner);
+        final Spinner spinner = (Spinner) findViewById(R.id.difficulty_spinner);
         // Create an ArrayAdapter using the string array and a default spinner layout
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
                 R.array.difficulty, android.R.layout.simple_spinner_item);
@@ -38,8 +39,19 @@ public class SetupActivity extends ActionBarActivity {
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         // Apply the adapter to the spinner
         spinner.setAdapter(adapter);
-        difficulty_text = spinner.getSelectedItem().toString();
-        difficulty_index = spinner.getSelectedItemPosition();
+        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                                              @Override
+                                              public void onItemSelected(AdapterView<?> arg0, View arg1, int position, long arg3) {
+                                                  difficulty_index = spinner.getSelectedItemPosition();
+                                              }
+
+                                              @Override
+                                              public void onNothingSelected(AdapterView<?> arg0) {
+                                                  difficulty_index = 0;
+                                              }
+                                          });
+//        difficulty_text = spinner.getSelectedItem().toString();
+
 
         ImageView picture_1 = (ImageView) findViewById(R.id.pic_1);
         ImageView picture_2 = (ImageView) findViewById(R.id.pic_2);
@@ -80,6 +92,7 @@ public class SetupActivity extends ActionBarActivity {
             public void onClick(View arg0) {
                 Intent intent = new Intent(context, GameActivity.class);
                 intent.putExtra("difficulty", difficulty_index);
+                Log.i("difficulty_index", "" + difficulty_index);
                 intent.putExtra("picture", last_selected);
                 startActivity(intent);
             }

@@ -7,7 +7,6 @@ import android.util.DisplayMetrics;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -17,6 +16,13 @@ import android.widget.RelativeLayout;
 import android.util.Log;
 import android.widget.TableRow;
 import android.widget.TableRow.LayoutParams;
+import android.widget.Toast;
+
+import java.sql.Array;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 public class GameActivity extends ActionBarActivity {
 
@@ -48,55 +54,79 @@ public class GameActivity extends ActionBarActivity {
         if (picture_path.equals("2")) { id = R.drawable.sample_2; }
         if (picture_path.equals("3")) { id = R.drawable.sample_3; }
 
-        RelativeLayout relativeLayout = (RelativeLayout) findViewById(R.id.complete_layout);
+        final RelativeLayout relativeLayout = (RelativeLayout) findViewById(R.id.complete_layout);
 
         // Initialize puzzle values
         DisplayMetrics metrics = this.getResources().getDisplayMetrics();
         final int DIMENSION = metrics.widthPixels - (2* relativeLayout.getPaddingRight());
-        int tiles_on_row = difficulty_index+3;
-        int number_of_tiles = (int) Math.pow((tiles_on_row), 2);
+        final int tiles_on_row = difficulty_index+3;
+        final int number_of_tiles = (int) Math.pow((tiles_on_row), 2);
         int counter = 0;
         int table_index = 0;
+        final int tile_size = (DIMENSION / tiles_on_row);
 
         Bitmap bMap_old = BitmapFactory.decodeResource(getResources(), id);
         Bitmap bMap = Bitmap.createScaledBitmap(bMap_old, DIMENSION, DIMENSION, true);
 
-        TableLayout table_puzzle = new TableLayout(this);
+        final TableLayout table_puzzle = new TableLayout(this);
 
-        TableRow[] tableArray = new TableRow[tiles_on_row];
-        ImageView[] imageViewArray = new ImageView[number_of_tiles];
-        Bitmap[] bitmapArray = new Bitmap[number_of_tiles];
+        final TableRow[] tableArray = new TableRow[tiles_on_row];
+        final ImageView[] imageViewArray = new ImageView[number_of_tiles];
+        final Bitmap[] bitmapArray = new Bitmap[number_of_tiles];
 
-        // For loop that fills the puzzle table with tiles (= parts of the picture)
+        // For loop that fills the image view array with tile images (= parts of the picture)
         for (int i = 0; i < number_of_tiles; i++ ) {
-            Log.i("counter ", "" + counter);
-            Log.i("row-1 ",  ""+ (tiles_on_row-1));
-            Log.i("table_index ", "" + table_index);
             if (i == (tiles_on_row)*table_index){
-                Log.i("start new row", ""+ table_index);
-                tableArray[table_index] = new TableRow(this);
-                tableArray[table_index].setLayoutParams(new TableLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
                 table_index = table_index + 1;
             }
             counter = counter + 1;
             imageViewArray[i] = new ImageView(this);
             imageViewArray[i].setId(i);     // unique property for every imageView
-            bitmapArray[i] = Bitmap.createBitmap(bMap, ((counter-1) *(DIMENSION / tiles_on_row)), (table_index-1) * DIMENSION/tiles_on_row, DIMENSION/tiles_on_row, DIMENSION/tiles_on_row);
+            bitmapArray[i] = Bitmap.createBitmap(bMap, ((counter-1) * tile_size), (table_index-1) * tile_size, tile_size, tile_size);
             imageViewArray[i].setImageBitmap(bitmapArray[i]);
-            tableArray[table_index-1].addView(imageViewArray[i]);
 
             if (counter == tiles_on_row){
-                Log.i("Try add row", ""+ tableArray[table_index-1]);
-                table_puzzle.addView(tableArray[table_index - 1], new TableLayout.LayoutParams(DIMENSION, DIMENSION));
-                Log.i("Added row", ""+ (table_index-1));
                 counter = 0;
             }
         }
 
-        // Shows the puzzle table
-        relativeLayout.addView(table_puzzle);
+        // A list of indexes for the imageview array is made and shuffled
+        final ArrayList<Integer> indexArray = new ArrayList<Integer>();
+        for (int j = 0; j < imageViewArray.length-1; j++){
+            indexArray.add(j);
+        }
+        Collections.shuffle(indexArray);
+        Collections.shuffle(indexArray);
+        indexArray.add((int) imageViewArray.length-1 );
+
+        // Here..
+        changePuzzle(number_of_tiles, tiles_on_row, DIMENSION, tableArray, indexArray, imageViewArray, table_puzzle, relativeLayout);
+        int index_empty_tile = number_of_tiles - 1;
+
+
+        for (int i = 0; i < number_of_tiles; i++) {
+            final int finalI = i;
+            imageViewArray[i].setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    Toast.makeText(GameActivity.this, "Swapped array"+ (finalI-1) + "with " + indexArray.get(number_of_tiles-1), Toast.LENGTH_SHORT).show();
+                    Log.i("indexArray before swap ", "" + indexArray);
+                    Log.i("index van lege tile ", "" + indexArray.get(number_of_tiles-1));
+                    Log.i("index van tile ", ""+(finalI));
+                    Collections.swap(indexArray, finalI, indexArray.get(number_of_tiles-1));
+//                    Log.i("Swapped array "+ (finalI-), "with " + (indexArray.get(number_of_tiles-1)));
+                    Log.i("indexArray after swap ", "" + indexArray);
+                    changePuzzle(number_of_tiles, tiles_on_row, DIMENSION, tableArray, indexArray, imageViewArray, table_puzzle, relativeLayout);
+                }
+            });
         }
 
+        }
+
+    public boolean checkMove (int number_of_tiles, int tiles_on_row, int DIMENSION, TableRow[] tableArray, ArrayList<Integer> indexArray, ImageView[] imageViewArray, TableLayout table_puzzle, RelativeLayout relativeLayout ){
+
+    return true;
+    }
 //    public void initializePuzzle(int tiles_on_row, Bitmap bMap){
 //        int tile_number;
 //        Bitmap tile = Bitmap.createBitmap(bMap, 0, 0, 60/tiles_on_row, 60/tiles_on_row);
@@ -104,6 +134,48 @@ public class GameActivity extends ActionBarActivity {
 ////        for (tile_number=0, tile_number < tiles_on_row*tiles_on_row, tile_number ++){
 ////            Bitmap tile_t = Bitmap.createBitmap(bMap, 0, 0, 60/tiles_on_row, 60/tiles_on_row);
 //        }
+
+    // The table is filled in random order with image tiles, except for last tile
+    public void changePuzzle(int number_of_tiles, int tiles_on_row, int DIMENSION, TableRow[] tableArray, ArrayList<Integer> indexArray, ImageView[] imageViewArray, TableLayout table_puzzle, RelativeLayout relativeLayout ) {
+        int table_index = 0;
+        int counter = 0;
+
+        for (TableRow tableRow: tableArray) {
+            if (tableRow != null) {
+                if ((int) tableRow.getChildCount() != 0) {
+                    tableRow.removeAllViewsInLayout();
+                }
+            }
+        }
+
+        if (table_puzzle != null){relativeLayout.removeView(table_puzzle);}
+
+        for (int i = 0; i < number_of_tiles; i++) {
+            if (i == (tiles_on_row) * table_index) {
+                tableArray[table_index] = new TableRow(this);
+                tableArray[table_index].setLayoutParams(new TableLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
+                table_index = table_index + 1;
+            }
+
+            counter = counter + 1;
+            tableArray[table_index - 1].addView(imageViewArray[indexArray.get(i)]);
+
+            if (counter == tiles_on_row) {
+//                Log.i("Try add row", "" + tableArray[table_index - 1]);
+                table_puzzle.addView(tableArray[table_index - 1], new TableLayout.LayoutParams(DIMENSION, DIMENSION));
+//                Log.i("Added row", "" + (table_index - 1));
+                counter = 0;
+            }
+
+            // Make the last tile transparent
+            if (i == number_of_tiles - 1) {
+                imageViewArray[i].setVisibility(View.INVISIBLE);
+            }
+        }
+
+        // Shows the puzzle table
+        relativeLayout.addView(table_puzzle);
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
