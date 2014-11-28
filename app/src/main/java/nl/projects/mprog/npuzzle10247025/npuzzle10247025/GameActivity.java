@@ -1,5 +1,6 @@
 package nl.projects.mprog.npuzzle10247025.npuzzle10247025;
 
+import android.content.Context;
 import android.support.annotation.DrawableRes;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
@@ -84,6 +85,7 @@ public class GameActivity extends ActionBarActivity {
             imageViewArray[i].setId(i);     // unique property for every imageView
             bitmapArray[i] = Bitmap.createBitmap(bMap, ((counter-1) * tile_size), (table_index-1) * tile_size, tile_size, tile_size);
             imageViewArray[i].setImageBitmap(bitmapArray[i]);
+//            imageViewArray[i].setTag(i);
 
             if (counter == tiles_on_row){
                 counter = 0;
@@ -100,43 +102,31 @@ public class GameActivity extends ActionBarActivity {
         indexArray.add((int) imageViewArray.length-1 );
 
         // Here..
-        changePuzzle(number_of_tiles, tiles_on_row, DIMENSION, tableArray, indexArray, imageViewArray, table_puzzle, relativeLayout);
-        int index_empty_tile = number_of_tiles - 1;
+        changePuzzle(number_of_tiles, tiles_on_row, DIMENSION, tableArray, indexArray, imageViewArray, table_puzzle, relativeLayout, true);
+        imageViewArray[indexArray.get(number_of_tiles-1)].setVisibility(View.INVISIBLE);
 
+        View.OnClickListener clickListener = new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+//                Log.i("test", "test");
+                Log.i("indexArray before swap ", "" + indexArray.get(Integer.parseInt(view.getTag().toString())) + " - " + indexArray);
+                Collections.swap(indexArray, Integer.parseInt(view.getTag().toString()), indexArray.indexOf(number_of_tiles-1));
+                Log.i("indexArray after swap ", "" + Integer.parseInt(view.getTag().toString()) + " - " + indexArray);
+                changePuzzle(number_of_tiles, tiles_on_row, DIMENSION, tableArray, indexArray, imageViewArray, table_puzzle, relativeLayout, false);
+            }
+        };
 
         for (int i = 0; i < number_of_tiles; i++) {
-            final int finalI = i;
-            imageViewArray[i].setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    Toast.makeText(GameActivity.this, "Swapped array"+ (finalI-1) + "with " + indexArray.get(number_of_tiles-1), Toast.LENGTH_SHORT).show();
-                    Log.i("indexArray before swap ", "" + indexArray);
-                    Log.i("index van lege tile ", "" + indexArray.get(number_of_tiles-1));
-                    Log.i("index van tile ", ""+(finalI));
-                    Collections.swap(indexArray, finalI, indexArray.get(number_of_tiles-1));
-//                    Log.i("Swapped array "+ (finalI-), "with " + (indexArray.get(number_of_tiles-1)));
-                    Log.i("indexArray after swap ", "" + indexArray);
-                    changePuzzle(number_of_tiles, tiles_on_row, DIMENSION, tableArray, indexArray, imageViewArray, table_puzzle, relativeLayout);
-                }
-            });
+            imageViewArray[i].setOnClickListener(clickListener);
         }
 
         }
 
     public boolean checkMove (int number_of_tiles, int tiles_on_row, int DIMENSION, TableRow[] tableArray, ArrayList<Integer> indexArray, ImageView[] imageViewArray, TableLayout table_puzzle, RelativeLayout relativeLayout ){
-
-    return true;
-    }
-//    public void initializePuzzle(int tiles_on_row, Bitmap bMap){
-//        int tile_number;
-//        Bitmap tile = Bitmap.createBitmap(bMap, 0, 0, 60/tiles_on_row, 60/tiles_on_row);
-//
-////        for (tile_number=0, tile_number < tiles_on_row*tiles_on_row, tile_number ++){
-////            Bitmap tile_t = Bitmap.createBitmap(bMap, 0, 0, 60/tiles_on_row, 60/tiles_on_row);
-//        }
+    return true;}
 
     // The table is filled in random order with image tiles, except for last tile
-    public void changePuzzle(int number_of_tiles, int tiles_on_row, int DIMENSION, TableRow[] tableArray, ArrayList<Integer> indexArray, ImageView[] imageViewArray, TableLayout table_puzzle, RelativeLayout relativeLayout ) {
+    public void changePuzzle(int number_of_tiles, int tiles_on_row, int DIMENSION, TableRow[] tableArray, ArrayList<Integer> indexArray, ImageView[] imageViewArray, TableLayout table_puzzle, RelativeLayout relativeLayout, boolean init ) {
         int table_index = 0;
         int counter = 0;
 
@@ -158,18 +148,19 @@ public class GameActivity extends ActionBarActivity {
             }
 
             counter = counter + 1;
+            imageViewArray[indexArray.get(i)].setTag(i);
             tableArray[table_index - 1].addView(imageViewArray[indexArray.get(i)]);
 
             if (counter == tiles_on_row) {
 //                Log.i("Try add row", "" + tableArray[table_index - 1]);
                 table_puzzle.addView(tableArray[table_index - 1], new TableLayout.LayoutParams(DIMENSION, DIMENSION));
-//                Log.i("Added row", "" + (table_index - 1));
                 counter = 0;
             }
 
             // Make the last tile transparent
-            if (i == number_of_tiles - 1) {
-                imageViewArray[i].setVisibility(View.INVISIBLE);
+            if (init == true) {
+                Log.i("Added row", "" + indexArray.get(i) + " array : " + indexArray);
+
             }
         }
 
