@@ -3,7 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:context="nl.projects.mprog.npuzzle10247025.npuzzle10247025.SetupActivity" >
     <item android:id="@+id/action_settings"
-        android:title="@string/action_settings"
+        android:title="@string/menu_difficulty"
         android:orderInCategory="100"
         app:showAsAction="never" />
 </menu>
