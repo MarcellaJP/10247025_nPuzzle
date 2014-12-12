@@ -1,4 +1,5 @@
 package nl.projects.mprog.npuzzle10247025.npuzzle10247025;
+// Marcella Wijngaarden - marcellawijngaarden@hotmail.com - 10247025
 
 import android.animation.ObjectAnimator;
 import android.content.Context;
@@ -28,10 +29,11 @@ public class SplashScreenActivity extends ActionBarActivity {
 
         // Get memory to check if a game is should be resumed
         SharedPreferences memory = getSharedPreferences(PREFS_NAME, 0);
-        String picture = memory.getString("picture", "none");
+        String picture = memory.getString("picture", "None");
+        boolean reload = memory.getBoolean("reload", false);
 
         // Check if the memory contains a game. If so, resume game. Else show intro screen.
-        if (!picture.equals("none")) {
+        if (!picture.equals("None")|| reload) {
             int difficulty_index = memory.getInt("difficulty", 0);
             Intent intent = new Intent(context, GameActivity.class);
             intent.putExtra("difficulty", difficulty_index);

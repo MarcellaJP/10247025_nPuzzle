@@ -1,5 +1,5 @@
 package nl.projects.mprog.npuzzle10247025.npuzzle10247025;
-
+// Marcella Wijngaarden - marcellawijngaarden@hotmail.com - 10247025
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -32,7 +32,7 @@ public class SetupActivity extends ActionBarActivity {
         addListenerOnButton();
 
         // A new game is to start so previous memory must be cleared
-        SharedPreferences memory = getSharedPreferences(PREFS_NAME, 0);
+        SharedPreferences memory = getSharedPreferences(PREFS_NAME, MODE_MULTI_PROCESS);
         SharedPreferences.Editor editor = memory.edit();
         // First get possible saved difficulty preference, else use default difficulty
         final int selection = memory.getInt("preference", DEFAULT);

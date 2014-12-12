@@ -1,4 +1,5 @@
 package nl.projects.mprog.npuzzle10247025.npuzzle10247025;
+// Marcella Wijngaarden - marcellawijngaarden@hotmail.com - 10247025
 
 import android.app.AlertDialog;
 import android.content.SharedPreferences;
@@ -16,7 +17,6 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.widget.TableLayout;
 import android.widget.RelativeLayout;
-import android.util.Log;
 import android.widget.TableRow;
 import android.widget.TableRow.LayoutParams;
 import android.widget.TextView;
@@ -31,29 +31,36 @@ public class GameActivity extends ActionBarActivity {
     private int difficulty_index;
     private String picture_path;
     private ArrayList<Integer> index_array = new ArrayList<Integer>();
-    SharedPreferences memory;
+    private SharedPreferences memory;
+    private RelativeLayout relative_layout;
+    private DisplayMetrics metrics;
+    private int dimension;
+    private int tiles_on_row;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_game);
-        memory = getSharedPreferences(PREFS_NAME, 0);
 
         // Get parameters set in setupActivity or from closed game: difficulty and picture
+        memory = getSharedPreferences(PREFS_NAME, MODE_MULTI_PROCESS);
+        SharedPreferences.Editor editor = memory.edit();
         String picture = memory.getString("picture", "None");
+        boolean reload = memory.getBoolean("reload", false);
         Intent intent = getIntent();
-        if (picture.equals("None")) {
+
+        if (picture.equals("None")|| !reload) {
             picture_path = intent.getStringExtra("picture");            // string number (0 - 3)
             difficulty_index = intent.getIntExtra("difficulty", 0);     // 0:easy, 1:medium, 2:hard
-            number_of_steps = 0;    // Reset number of steps
-            Log.i("intent is ", "" + intent);
+            number_of_steps = 0;                                        // Reset number of steps
+            editor.remove("reload");
+            editor.putBoolean("reload", true);
+            editor.commit();
         } else {
-            Log.i("from memory ", "" + picture);
             picture_path = memory.getString("picture", "None");
             difficulty_index = memory.getInt("difficulty", 0);
             number_of_steps = memory.getInt("step_number", 0);
         }
-        Log.i("picture path ", "" + picture_path);
 
         // Convert picture reference string to picture id
         final ImageView puzzle_picture = (ImageView) findViewById(R.id.puzzle_picture);
@@ -61,17 +68,17 @@ public class GameActivity extends ActionBarActivity {
 
         // Initialize puzzle values
         final RelativeLayout relative_layout = (RelativeLayout) findViewById(R.id.complete_layout);
-        final DisplayMetrics metrics = this.getResources().getDisplayMetrics();
-        final int DIMENSION = metrics.widthPixels - (2 * relative_layout.getPaddingRight());
-        final int tiles_on_row = difficulty_index + 3;
+        metrics = this.getResources().getDisplayMetrics();
+        dimension = metrics.widthPixels - (2 * relative_layout.getPaddingRight());
+        tiles_on_row = difficulty_index + 3;
         final int number_of_tiles = (int) Math.pow((tiles_on_row), 2);
+        final int tile_size = (dimension / tiles_on_row);
         int counter = 0;
         int table_index = 0;
-        final int tile_size = (DIMENSION / tiles_on_row);
 
-        Bitmap bMap_old = BitmapFactory.decodeResource(getResources(), id);
-        final Bitmap bMap = Bitmap.createScaledBitmap(bMap_old, DIMENSION, DIMENSION, true);
-        puzzle_picture.setImageBitmap(bMap);
+        Bitmap bmap_old = BitmapFactory.decodeResource(getResources(), id);
+        final Bitmap bmap = Bitmap.createScaledBitmap(bmap_old, dimension, dimension, true);
+        puzzle_picture.setImageBitmap(bmap);
         final TableLayout table_puzzle = new TableLayout(this);
         final TableRow[] table_array = new TableRow[tiles_on_row];
         final ImageView[] image_array = new ImageView[number_of_tiles];
@@ -84,8 +91,8 @@ public class GameActivity extends ActionBarActivity {
             }
             counter = counter + 1;
             image_array[i] = new ImageView(this);
-            bitmap_array[i] = Bitmap.createBitmap(bMap, ((counter-1) * tile_size),
-                    (table_index-1) * tile_size, tile_size, tile_size);
+            bitmap_array[i] = Bitmap.createBitmap(bmap, ((counter - 1) * tile_size),
+                    (table_index - 1) * tile_size, tile_size, tile_size);
             image_array[i].setImageBitmap(bitmap_array[i]);
             image_array[i].setPadding(5, 5, 5, 5);
             image_array[i].setAdjustViewBounds(true);
@@ -102,13 +109,13 @@ public class GameActivity extends ActionBarActivity {
         }
 
         // A list of indexes for the imageview array is made and shuffled
-        if (picture == "None") {
+        if (picture.equals("None") || !reload) {
             for (int j = 0; j < image_array.length - 1; j++) {
                 index_array.add(j);
             }
             // Shuffle the list of image indexes: in this random order the table will be filled
             index_array = getShuffledList(index_array);
-            index_array.add((int) image_array.length - 1);   // Last tile is not random
+            index_array.add(image_array.length - 1);   // Last tile is not random
         } else {
             index_array.clear();
             for(int i = 0; i < image_array.length; i++) {
@@ -120,7 +127,7 @@ public class GameActivity extends ActionBarActivity {
         step_view.setText("" + number_of_steps);
 
         // Initiate the puzzle and make the last tile invisible
-        changePuzzle(number_of_tiles, tiles_on_row, DIMENSION, table_array, index_array,
+        changePuzzle(number_of_tiles, tiles_on_row, dimension, table_array, index_array,
                 image_array, table_puzzle, relative_layout);
         image_array[number_of_tiles - 1].setVisibility(View.INVISIBLE);
 
@@ -143,7 +150,7 @@ public class GameActivity extends ActionBarActivity {
                     Collections.swap(index_array, Integer.parseInt(view.getTag().toString()),
                             index_array.indexOf(number_of_tiles - 1));
                     // Then change the puzzle layout accordingly
-                    changePuzzle(number_of_tiles, tiles_on_row, DIMENSION, table_array, index_array,
+                    changePuzzle(number_of_tiles, tiles_on_row, dimension, table_array, index_array,
                             image_array, table_puzzle, relative_layout);
                     // Update the number of steps displayed
                     number_of_steps ++;
@@ -166,7 +173,7 @@ public class GameActivity extends ActionBarActivity {
         super.onPause();
         // An editor object to make preference changes.
         // All objects are from android.context.Context
-        SharedPreferences memory = getSharedPreferences(PREFS_NAME, 0);
+        memory = getSharedPreferences(PREFS_NAME, MODE_MULTI_PROCESS);
         SharedPreferences.Editor editor = memory.edit();
         editor.putInt("difficulty", difficulty_index);
         editor.putString("picture", picture_path);
@@ -196,13 +203,13 @@ public class GameActivity extends ActionBarActivity {
         return index_array;
     }
 
-    public boolean isSolved(ArrayList solvedArray, ArrayList<Integer> index_array, int number_of_steps) {
+    public boolean isSolved(ArrayList solvedArray, ArrayList<Integer> index_array,
+                            int number_of_steps) {
         for (int i = 0; i < solvedArray.size(); i++) {
             if (solvedArray.get(i) != index_array.get(i)) {
                 return false;
             }
         }
-
         // If solved (so not false) finish this activity and call next activity
         Intent intent = getIntent();
         String pic_path = intent.getStringExtra("picture");
@@ -215,27 +222,28 @@ public class GameActivity extends ActionBarActivity {
         return true;
     }
 
-    public boolean checkMove (ImageView clickedView, int number_of_tiles, int tiles_on_row, ImageView[] image_array ){
+    public boolean checkMove (ImageView clicked_view, int number_of_tiles, int tiles_on_row,
+                              ImageView[] image_array ){
         ImageView blanc_tile = image_array[number_of_tiles -  1];
         int blanc_pos = Integer.parseInt(blanc_tile.getTag().toString());
-        int clicked_pos = Integer.parseInt(clickedView.getTag().toString());
+        int clicked_pos = Integer.parseInt(clicked_view.getTag().toString());
 
         // Check if clicked tile is adjacent to blanc tile, if so return true
         if (clicked_pos == (blanc_pos + tiles_on_row)) { return true; }
         if (clicked_pos == (blanc_pos - tiles_on_row)) { return true; }
         if (clicked_pos == (blanc_pos + 1)) {
-            if (clickedView.getParent() == blanc_tile.getParent()) {
+            if (clicked_view.getParent() == blanc_tile.getParent()) {
                 return true;
             }
         }
         if (clicked_pos == (blanc_pos - 1)) {
-            if (clickedView.getParent() == blanc_tile.getParent()) {
+            if (clicked_view.getParent() == blanc_tile.getParent()) {
                 return true; }
             }
         return false;
     }
 
-    public void changePuzzle(int number_of_tiles, int tiles_on_row, int DIMENSION,
+    public void changePuzzle(int number_of_tiles, int tiles_on_row, int dimension,
                              TableRow[] table_arrray, ArrayList<Integer> index_array,
                              ImageView[] image_array, TableLayout table_puzzle,
                              RelativeLayout relativeLayout) {
@@ -245,7 +253,7 @@ public class GameActivity extends ActionBarActivity {
         // First clear tablerows from previous views
         for (TableRow tableRow: table_arrray) {
             if (tableRow != null) {
-                if ((int) tableRow.getChildCount() != 0) {
+                if (tableRow.getChildCount() != 0) {
                     tableRow.removeAllViewsInLayout();
                 }
             }
@@ -266,7 +274,7 @@ public class GameActivity extends ActionBarActivity {
             }
 
             counter = counter + 1;
-            image_array[index_array.get(i)].setId(index_array.get(i));      // unique property for every imageView
+            image_array[index_array.get(i)].setId(index_array.get(i));
             image_array[index_array.get(i)].setTag((i));
             image_array[index_array.get(i)].setLayoutParams(new TableRow.LayoutParams(
                     LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT, 1f));
@@ -274,7 +282,8 @@ public class GameActivity extends ActionBarActivity {
 
             // Add the finished table row to table view
             if (counter == tiles_on_row) {
-                table_puzzle.addView(table_arrray[table_index - 1], new TableLayout.LayoutParams(DIMENSION, DIMENSION));
+                table_puzzle.addView(table_arrray[table_index - 1],
+                        new TableLayout.LayoutParams(dimension, dimension));
                 counter = 0;
             }
         }
@@ -310,41 +319,48 @@ public class GameActivity extends ActionBarActivity {
         String pic_path = intent.getStringExtra("picture");
 
         if (id == R.id.change_difficulty) {
-            // Open new activity
-            Intent intent_diff = new Intent(getApplicationContext(), changeDifficultyActivity.class);
+            // Open new activity to change difficulty
+            Intent intent_diff = new Intent(getApplicationContext(), ChangeDifficultyActivity.class);
             intent_diff.putExtra("picture", pic_path);
             startActivity(intent_diff);
         } if (id == R.id.shuffle) {
-            // Restarts the game with same parameters
-            int difficulty = intent.getIntExtra("difficulty", 0);
+            // Restarts the game with same picture and difficulty
+            memory = getSharedPreferences(PREFS_NAME, MODE_MULTI_PROCESS);
             SharedPreferences.Editor editor = memory.edit();
-            editor.remove("picture");
+            editor.clear();
+            editor.putBoolean("reload", false);
             editor.commit();
+
+            // Start the game activity with picture and difficulty
+            int difficulty = intent.getIntExtra("difficulty", 0);
             Intent intent_shuffle = new Intent(getApplicationContext(), GameActivity.class);
             intent_shuffle.putExtra("picture", pic_path);
             intent_shuffle.putExtra("difficulty", difficulty);
             startActivity(intent_shuffle);
+            finish();
         } if (id == R.id.show_solution){
             // Shows the solution image in a dialog
-            final RelativeLayout relativeLayout = (RelativeLayout) findViewById(R.id.complete_layout);
-            final DisplayMetrics metrics = this.getResources().getDisplayMetrics();
-            final int DIMENSION = metrics.widthPixels - (2* relativeLayout.getPaddingRight());
             int picture_id = getPictureId(pic_path);
-            Bitmap bMap_old = BitmapFactory.decodeResource(getResources(), picture_id);
-            Bitmap bMap = Bitmap.createScaledBitmap(bMap_old, DIMENSION, DIMENSION, true);
-            ImageView solution = new ImageView(this);
-            solution.setImageBitmap(bMap);
 
+            // Get picture and set correct layout
+            ImageView solution = new ImageView(this);
+            solution.setImageResource(picture_id);
+            solution.setAdjustViewBounds(true);
+
+            // Make dialog and set correct layout and view
             AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
             dialogBuilder
                     .setView(solution)
                     .show();
-
             AlertDialog dialog = dialogBuilder.create();
-            WindowManager.LayoutParams lp = dialog.getWindow().getAttributes();
-            lp.dimAmount=0.5f;
-            dialog.getWindow().setAttributes(lp);
+            WindowManager.LayoutParams layout_parameters = dialog.getWindow().getAttributes();
+            layout_parameters.dimAmount = 0.5f;
+            layout_parameters.width = LayoutParams.WRAP_CONTENT;
+            dialog.getWindow().setAttributes(layout_parameters);
             dialog.getWindow().addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
+        } if (id == R.id.quit) {
+            // Quits current game and returns to the setup screen
+            onBackPressed();
         }
         return super.onOptionsItemSelected(item);
     }

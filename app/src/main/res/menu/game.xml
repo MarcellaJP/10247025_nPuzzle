@@ -4,14 +4,18 @@
     tools:context="nl.projects.mprog.npuzzle10247025.npuzzle10247025.GameActivity" >
     <item android:id="@+id/shuffle"
         android:title="@string/menu_shuffle"
-        android:orderInCategory="100"
+        android:orderInCategory="1"
         app:showAsAction="never" />
     <item android:id="@+id/change_difficulty"
         android:title="@string/menu_difficulty"
-        android:orderInCategory="100"
+        android:orderInCategory="2"
         app:showAsAction="never" />
     <item android:id="@+id/show_solution"
         android:title="@string/menu_solution"
-        android:orderInCategory="100"
+        android:orderInCategory="3"
+        app:showAsAction="never" />
+    <item android:id="@+id/quit"
+        android:title="@string/quit"
+        android:orderInCategory="4"
         app:showAsAction="never" />
 </menu>

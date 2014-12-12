@@ -1,4 +1,5 @@
 package nl.projects.mprog.npuzzle10247025.npuzzle10247025;
+// Marcella Wijngaarden - marcellawijngaarden@hotmail.com - 10247025
 
 import android.app.AlertDialog;
 import android.content.Context;
@@ -13,7 +14,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
 
-public class changeDifficultyActivity extends ActionBarActivity {
+public class ChangeDifficultyActivity extends ActionBarActivity {
     int difficulty_index;
     String picture_path;
     public static final String PREFS_NAME = "PrefsFile";
@@ -33,7 +34,7 @@ public class changeDifficultyActivity extends ActionBarActivity {
         }
 
          // Create Spinner to change difficulty
-        final Spinner spinner = new Spinner(changeDifficultyActivity.this); //(Spinner) findViewById(R.id.difficulty_spinner_toast);
+        final Spinner spinner = new Spinner(ChangeDifficultyActivity.this); //(Spinner) findViewById(R.id.difficulty_spinner_toast);
         // Create an ArrayAdapter using the resource string array and a default spinner layout
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
                 R.array.difficulty, android.R.layout.simple_spinner_item);
@@ -72,7 +73,7 @@ public class changeDifficultyActivity extends ActionBarActivity {
 
                         // Remember the difficulty preference for future games but remove all other
                         // game memories (because a new game should start)
-                        SharedPreferences memory = getSharedPreferences(PREFS_NAME, 0);
+                        SharedPreferences memory = getSharedPreferences(PREFS_NAME, MODE_MULTI_PROCESS);
                         SharedPreferences.Editor editor = memory.edit();
                         editor.clear();
                         editor.putString("picture", "None");
@@ -89,7 +90,7 @@ public class changeDifficultyActivity extends ActionBarActivity {
                 })
                 .setNegativeButton("Back",new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog,int id) {
-                        // if this button is clicked, just close
+                        // If this button is clicked, just close
                         // the dialog box and do nothing
                         finish();
                     }

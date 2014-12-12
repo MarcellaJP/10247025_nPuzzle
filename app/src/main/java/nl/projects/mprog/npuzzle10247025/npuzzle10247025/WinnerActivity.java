@@ -1,5 +1,5 @@
 package nl.projects.mprog.npuzzle10247025.npuzzle10247025;
-
+// Marcella Wijngaarden - marcellawijngaarden@hotmail.com - 10247025
 import android.content.Context;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
@@ -44,6 +44,7 @@ public class WinnerActivity extends ActionBarActivity {
             public void onClick(View arg0) {
                 Intent intent_back = new Intent(context, SetupActivity.class);
                 startActivity(intent_back);
+                finish();
             }
         });
 

@@ -13,6 +13,7 @@
     <string name="step_count">Steps  </string>
     <string name="winner">Congratulations, you won! </string>
     <string name="back_button">Back</string>
+    <string name="quit">Quit</string>
 
     <string-array name="difficulty">
         <item>Easy</item>

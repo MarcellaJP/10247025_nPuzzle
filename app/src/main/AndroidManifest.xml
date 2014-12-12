@@ -34,7 +34,7 @@
             android:configChanges="keyboardHidden|orientation|screenSize" >
         </activity>
         <activity
-            android:name=".changeDifficultyActivity"
+            android:name=".ChangeDifficultyActivity"
             android:label="@string/menu_difficulty"
             android:theme="@style/Theme.AppCompat.Dialog"
             android:screenOrientation="portrait"
